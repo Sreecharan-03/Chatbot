@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Chatbot</title>
+    <style>
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            background-color: white;
+            border-radius: 15px;
+            width: 420px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        /* Chat Messages */
+        .chatbox {
+            flex-grow: 1;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 12px;
+            border-radius: 10px;
+            word-wrap: break-word;
+            font-size: 15px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .user {
+            background-color: #d1ffd1;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot {
+            background-color: #f4f4f4;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        /* Input Section */
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chatbox">
+            <div id="messages" class="messages"></div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask me anything..." onkeydown="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadChatHistory();
+        });
+    
+        function sendMessage() {
+            const userInputField = document.getElementById('user-input');
+            const userInput = userInputField.value.trim();
+            if (!userInput) return;
+    
+            displayMessage(userInput, 'user');
+            userInputField.value = '';
+    
+            setTimeout(() => {
+                generateBotResponse(userInput);
+            }, 1000);
+        }
+    
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    
+        function displayMessage(message, sender) {
+            const messagesContainer = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            messagesContainer.appendChild(messageElement);
+            saveChatHistory();
+            scrollToBottom();
+        }
+    
+        function generateBotResponse(userMessage) {
+            const botMessage = getBotResponse(userMessage);
+            displayMessage(botMessage, 'bot');
+        }
+    
+        function getBotResponse(userMessage) {
+            const responses = {
+                'hello': ["Hi there! How can I assist you today? 😊", "Hello! How's your day going?"],
+                'how are you': ["I'm doing great! Thanks for asking 😊", "I'm just a bot, but I'm happy to chat!"],
+                'bye': ["Goodbye! Have a great day! 👋", "See you soon!"],
+                'time': [`The current time is ${new Date().toLocaleTimeString()} ⏰`],
+                'date': [`Today's date is ${new Date().toLocaleDateString()} 📅`],
+                'weather': ["I can't check live weather, but you can try a weather app! ☀️🌧️"],
+                'hobby': ["I enjoy chatting with people like you! 😊", "Helping people is my favorite thing to do!"],
+                'favorite color': ["I love blue! What about you? 🎨", "I don't have eyes, but I imagine neon green is cool!"],
+                'programming': ["Python is my favorite! 🐍 What’s yours?", "I love JavaScript! But Python is also cool."],
+                'motivation': [
+                    "Believe in yourself! You can achieve anything! 💪",
+                    "Stay positive and work hard. Good things will come. ✨",
+                    "Every day is a new opportunity to grow! 🚀"
+                ],
+                'sports': ["I like football! Do you have a favorite team? ⚽", "Basketball is exciting! Do you watch it? 🏀"],
+                'movie': ["I love sci-fi movies! What’s your favorite? 🎬", "Movies are a great way to relax!"],
+                'music': ["Music is life! Do you like pop, rock, or classical? 🎵", "I love any song with a good beat!"],
+                'book': ["Reading is amazing! Do you have a favorite book? 📚", "I recommend 'Harry Potter' or 'The Hobbit'!"],
+                'riddle': [
+                    "What has keys but can’t open locks? A piano! 🎹",
+                    "I speak without a mouth and hear without ears. What am I? An echo! 🔊",
+                    "The more you take, the more you leave behind. What is it? Footsteps! 👣"
+                ],
+                'ai': ["AI is changing the world! What do you think about it? 🤖", "I am an AI chatbot! 😊"],
+                'fun fact': [
+                    "Did you know? Honey never spoils! 🍯",
+                    "A day on Venus is longer than a year on Venus! 🪐",
+                    "Bananas are berries, but strawberries aren’t! 🍌🍓"
+                ],
+                'joke': [
+                    "Why don’t skeletons fight each other? They don’t have the guts! 😄",
+                    "Why did the scarecrow win an award? Because he was outstanding in his field! 🌾",
+                    "What do you call cheese that isn't yours? Nacho cheese! 😆"
+                ],
+                'default': ["I'm not sure about that 🤔", "Could you rephrase your question?", "Sorry, I didn’t understand."]
+            };
+    
+            userMessage = userMessage.toLowerCase();
+            let responseArray = responses[userMessage] || responses['default'];
+            return Array.isArray(responseArray) ? responseArray[Math.floor(Math.random() * responseArray.length)] : responseArray;
+        }
+    
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    
+        function saveChatHistory() {
+            const chatHistory = document.getElementById('messages').innerHTML;
+            localStorage.setItem("chatHistory", chatHistory);
+        }
+    
+        function loadChatHistory() {
+            const savedChat = localStorage.getItem("chatHistory");
+            if (savedChat) {
+                document.getElementById('messages').innerHTML = savedChat;
+                scrollToBottom();
+            }
+        }
+    </script>
+    
+
+</body>
+</html>
